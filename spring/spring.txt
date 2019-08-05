@@ -1,0 +1,222 @@
+spring：
+	一:简化java开发
+		1.不用向其他的框架一样继承类来限制自己开发的类的管理和扩展
+		2.采用接口依赖注入： 构造器注入 优点：这样不依赖与某个具体的类，可以随意更改实现接口的具体类
+		3.java通过上下文（application context)装载bean的定义并将他们组装其来，负责组装了创建对象
+	二：（aspect-oritend programming)AOP面向切面编程
+		1.可以把遍布各处的功能分离出来组成可重用的组件
+		2.系统由不同的组件组成每一个组件都负责一块特定的功能，但是很多时候这些组件除了承担自身的核心业务功能之外
+			还承担着额外的职责，如日志、事务管理，这些系统服务会融合进核心业务的逻辑，而这些系统服务就叫做横切关注点 
+			因为他们跨域系统的多个组件
+			若把这些关注点分散到多个组件上去，代码将会变得复杂
+				1.实现关注点功能的代码会重复出现在各个组件中，几时把关注点抽象为一个独立的模块，其他模块只是调用它的方法，
+					但是调用的方法还是会重复出现杂各个模块中，一旦修改将难以维护
+				2.组件会因为一些无关的代码而变得混乱，无法关注自身的逻辑
+		3.模版消除样式代码 JDBCTemplate模版，消除了很多JDBC编写时的重复性工作
+		4.spring容器 ： 创建和装配对象，并存放于容器内 spring有多个容器：bean工厂和应用上下文（记忆beanFactory实现)
+			常用上下文：
+				1.AnnotationConfigApplicationContext
+				2.AnnotationConfigWebApplicationContext
+				3.FileSystemXmlApplicationContext
+				4.XmlWebApplicationContext
+		
+		5.spring模块：
+			1.核心容器
+			2.AOP模块
+			3。数据访问和集成
+			4.Web和远程调用
+			5.测试
+二：装配bean
+	一：装配bean的方式
+		1.在xml中进行显式配置
+		2.在java中进行显式配置
+		3.隐式的bean发现机制和自动装配
+		
+		尽量减少显式配置bean（比如源码不是由自己维护的），推荐使用javaconfig而不使用xml
+		
+	二:自动化装配bean
+		spring实现自动装配的两个角度：
+			1.组件扫描（component scanning）：Spring自动发现应用上下文中所创建的bean
+			2.自动装配（autowiring）：spring自动满足bean之间的依赖（为某个变量赋值对应的对象就是满足依赖，装配类似于依赖）
+			
+		为bean添加注解实现自动装配 ：会在应用上下文中寻找某个bean需求的其他bean
+			1.Autorwired可以注解
+				1.用在构造器上容器会通过这个构造器来实例化，并且会传入对应的参数类型的bean
+				2.用在属性的setter方法上类似以上
+				当时当spring无法寻找到匹配的bean，那么应用上下文在创建时会抛出异常这是可以设置
+				Autorwired(required=flase)这样就不会抛出异常但是会空指针异常
+		
+		通过java代码装配bean：有时候无法进行自动配置，比如第三方包，我们无法把@Componet注解在代码上此时就
+		无法使用自动化装配方案了
+			1.在进行显式配置时，javaConfig是更好的方案，因为它强大而且类型安全易于重构，不像在xml
+			2.javaconfig区别于其他的java代码，虽然其他的业务代码也可以通过@configuration来标记
+			为配置类，再加上@bean来实现，但是javaConfig与业务逻辑中的代码不同，他本身就是配置代码，
+				不应该添加到其他业务代码中，所以它在逻辑上也常常放在单独的包中以便于区分其他业务代码。
+				（区分与其他业务代码以及配置的统一管理化，而不用其他方式，类似于basepackages
+				和basepackageClass的区别）
+			
+			3.声明简单的bean @Bean注解的方法可以采用任何必要的java功能来产生bean实例
+				比如：
+				@Bean
+				public CDPlayer cdPlayer（CompactDisc compactdisc){
+					return new CDPlayer(compactdisc)
+				}
+				compactdisc会被自动注解
+			
+			4.默认情况下spring中的bean都是单例
+		
+		通过xml实现自动装配
+		
+		无论通过xml装配还是javaConfig装配，一般都会配置一个根配置，这个配置会将两个或更多的
+			装配类和xml文件结合起来
+	
+	
+	三:高级装配
+		环境与profile：开发阶段所用的某些环境并不适合迁移到生产环境中，比如数据库配置、加密算法等
+			若是每一次迁移都要重新构建，那么很不方便故有了profile
+			
+			1.首先用@profile指明bean是属于哪一个环境下的，然后在部署到对应环境时启动激活相应的环境profile
+			2.激活profile @profileActive
+		
+		条件化的bean：一个或多个bean只有在应用的类路径下包含特定的库时才创建，或则当某个特定的bean也
+			声明了才创建，或是在某个特定的环境变量配置后才创建某个bean @Conditional（CDPlayer.class)
+		
+		自动装配的歧义：@primary @Qulifier（cdplayer）指定想要注入的bean的id
+			可以配合Autowired使用在使用时指定注入的id的名字
+			@Autowired
+			@Qulifier（“cdplayer”）指定要注入的bean的id
+			3.使用自定义注解符
+		
+		bean的作用域：
+			1.单列（singleton）
+			2.原型（prototype）：每次注入或通过上下文获取是创建一个新的bean
+			3.会话（session）：在web应用中，为每一个bean实例创建一个bean实例
+			3.请求（request）：在web...
+			单例是默认作用域，可以通过@Scope配合@Component来指定
+		
+		运行时值的注入：
+			方式：
+				1.属性占位符（property placehloder）
+				2.spring表达式语言（SpEL）；
+			
+			2.SpEl
+				特性：
+					1.使用bean的id来引用bean
+					2.调用方法和访问对象的属性的属性
+					3.对值进行关系、算术和逻辑运算
+					4.正则表达式匹配
+					5.集合操作
+				
+				1.SpEL要放到#{}中 T（）表达式表示会将java.lang.System视为java对应的类型
+				2.表示字面值：#{3.14} #{“hello”} #{true}
+				3.引用bean、属性和方法
+					#{sgtPeppers}
+					#{sgtPeppers.artist}
+					#{sgtPeppers.paly()}
+				4.在java表达式中使用类型
+					#{T（java.lang.Math）.PI}
+				5.SpEl运算符
+					逻辑运算符： and or not |
+					条件运算符： ？：（）
+					正则表达式matches 对左面的文本应用右边的表达式 #{admin.name matches ^[a-z]
+				6.计算集合
+					#{jukebox.songs[4].title}
+					应用[]运算符从集合或数组上索引内容
+					.?[]对接会进行过滤得到一个子集#{jukebox.songs.?[arittis eq "fanyunjie"]}
+					.^[] .$[]
+
+
+			
+	四：面向切面的Spring
+		横切关注点：在软件开发中，散布于应用中多处的功能被称为横切关注点（cross-cutting concern），通常来讲
+			横切关注点从概念上应该与应用的业务逻辑分离的（但是往往会直接嵌入到应用的业务逻辑中）比如事务、缓存、安全
+		Di有助于应用对象之间的解耦，而AOP实现横切关注点和它们所影响的对象之间的解耦
+		
+		通知（advice）切面的工作
+			前置通知（before）
+			后置通知（after）
+			返回通知（after-returning）目标方法成功执行之后调用通知
+			异常通知（after-throwing）目标方法抛出异常后通知
+			环绕通知（around)
+			
+		连接点(join point)
+		切点（pointcut）定义了在"何处"切入
+		切面（ASPect） 通知切点和通知的结合
+		引入：允许我们向现有类添加新方法和属性
+		织入（weaving）：把切面应用到目标对象并创建新的代理
+		
+		
+		spring只支持方法级别的连接点
+			编写切点：execution（*convert.Performance.perform(..))&&within（convert.*）
+				*代表任意返回类型 
+				convert.Performance是全限定类名
+				perform表示方法名
+				（..)表名可以选择任意的peform方法，无论入参是什么
+				&&是操作符 还有|| ！ 可以用and or not 代替，因为&在xml有特殊含义
+				within是指示器 
+				上述形成的关系是切点必须满足所有的指示器
+				execution（*convert.Performance.perform(..)) and bean（'websocket") 执行perfrom方法通知时限定bean的id是
+			2.使用注解创建切面@aspect
+			3.@before先与@around  @After 先与@AfterReturning
+			4.处理通知中的参数(切面传递和使用被通知方法的参数） 
+			5.java不是动态语言，一旦编译完成就很难为该类添加新的功能了，之前所做的只是为对象的拥有的新方法添加了新功能
+				而没有为对象添加任何新方法
+			6.xml实现切面
+			7.aspectj相比spring aop提供了更多类型的切点，比如创建对象时应用通知
+	
+	
+	SpringMVC
+		spring将请求在调度Servlet、处理映射器（handler mapping）、控制器以及视图解析器（view resolve）之间移动
+		
+		
+		跟踪springMVC的请求
+			请求第一站是dispatcherServlet（这是一个前端控制器（front controller），和大多数的web框架一样，请求会先通过
+				一个前端控制器
+			dispatchherServlet将请求发送给spring MVC控制器，为知道将请求发送到哪里，dispatcherServlet会查询
+				一个或多个处理器映射器（handler mapping）来确定请求的下一站
+			到了控制器，请求的卸下用户提交的信息，并处理这些信息，控制器处理完这些逻辑之后，会产生一些数据，通常这些数据
+				会传送到浏览器，这些信息被称为模型（model）(就是数据库中的数据）
+			控制器做的最后一件事就是将数据模型打包，并标注用于渲染输出的视图名（逻辑视图名），将请求连同模型、视图名发送回
+				dispatcherServlet，dispatcherServlet根据逻辑视图名找到视图解析器（view resolve），最后视图解析器用
+				模型数据渲染输出。
+				
+		
+		配置dispatcherServlet：之前一直都在web.xml中配置，现在会使用java把dispatcherServlet配置在Servlet容器中，扩展
+			AbstractAnnotation-ConfigDsipatcherServletInitializer的任意类都会自动配置DispatcherServlet和spring应用上下文
+			
+			其中三个方法：
+				getservletMappings()它会将一个或者多个路径映射到DsipatchServlet上
+				其他的连个方法涉及到了一个sevlet监听器，（ContextLoaderListener）
+				当dispatcherServlet启动时，他会创建spirng应用上下文，并加载配置文件和配置类中声明的bean，使用的是
+				getServletConfigClasses（），返回与需要加载的bean
+				而ContextLoaderListener也会加载bean但是采用getRootConfigClasses（）
+				
+		启动springMVC：
+			<mvc:annotation-driven>
+			java配置：注解@EnabelWebMvc 
+			没有配置视图解析器是spring会默认使用beanNameView-resovler ,这个视图解析器会查找ID与视图名称相匹配 的bean
+				，并且查找的bean要实现view接口
+			没有启动组件扫描，spring只能找到@EnableWebMvc配置类中打的bean
+			DsipatcherServlet会映射为应用的默认servlet，所以会处理所有的请求
+			
+		编写控制器：控制器只是方法上添加了@RequestMapping注解的类
+		传递模型数据到视图中
+			
+			
+				
+			
+				
+		
+		
+		
+		
+		
+		
+		
+		
+		
+			
+		
+		
+		
+		

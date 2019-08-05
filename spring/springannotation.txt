@@ -1,0 +1,75 @@
+spring注解：
+	@Component ：表明该类为组件类，并告知spring为这个类创建bean 
+	@ComponentScan : 若没有配置则扫描该与配置类同样的包 也可以通过xml中的spring context命名空间中的
+		<context：component-scan>启动组件扫描。	
+		@ComponentScan(value="com.fan") /(basepackages ={“com.fan”）这种方式是一种不安全的方法，
+		当代码进行重构时，因为是按照字符串的方式扫描所以包名改变是便会发生错误，所以可以用指定类的方式
+		（basepackageClasses={com.fan.CDPlayer.class...}这些了所在的包将会作为基础包
+	@RunWith(SpringJUnit4ClassRunner.class)用于
+	@ContextConfiguration(classes=)或者（loactions=“calsspath：）或（locations="classpath*:)
+		classpath：只会到你的class路径中查找找文件。{"classpath*:/*.xml"}就表示将class路径里的所有.xml文件都包括进来，
+		classpath*：不仅包含class路径，还包括jar文件中（class路径）进行查找。
+	@configuration表名这是一个配置类，这个类包含spring应用上下文如何创建bean的细节
+	@bean告诉spring该方法会产生一个对象，改对象要注册成为spring应用上下文中的bean，默认情况下bean的Id与
+		方法名一样
+	<constructor-arg ref=> xml注解bean的构造器 <set> <list>
+	xml通过属性注入:<property name= ref=> 或<property name value> value是字面值而ref是bean
+	@Import（CDPlayer.class) @ImportResuorce("classpath:application.xml"） 用来结合不同的配置类
+	 类似<import resource="application.xml">
+	 
+	@profile("dev") @profile("QV") 指明bean是那一个环境下用的，dev或qv等等	或用
+		<beans profile="dev">
+	
+	@ActiveProfiles("dev")可以同时激活多个环境
+	 或则在web.xml配置文件中用：
+		<context-param>
+			<context-name>spring.profiles.default<context-name>
+			<context-value>dev<context-value>
+			或
+			<context-name>spring.profiles.active<context-name>
+			<context-value>dev,qv<context-value>
+			
+	@Conditional(CDPLYAER.class）CDplayer类必须实现condition接口 
+		对应matches的返回值进行判断是否创建bean
+		
+	
+	@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)指定bean的作用域
+	@Scope(value=ConfigurableBeanFactory.SCOPE_SESSION，proxyMode=ScopedProxyMode.INTERFACE/TARGET_CLASS)
+	@Aspect
+	通知@After（execution（public string）） @AfterReturning。。。 ..*表示包、子孙包下的所有类 find*(..)方法名以find为前缀
+		方法定义中*表示任意类型的参数 ..表示任意类型且参数个数不限  
+		在类名模式串中，“.*”表示包下的所有类，而“..*”表示包、子孙包下的所有类。
+	@PointCut能够在@ASPECT切面内定义一个可重用的切点
+	@EnableAspectJAutoProxy 在配置类上使用用来启动自动代理模式(注意切面类要先注册到容器中）
+		<aop:aspectj-autoproxy/>来启动
+	@PointCut("execution（public* com.fan.CompactDisc.playTrace（int) && args(trackNums)") args(trackNums)指定参数，它明确传到
+		playTrace的方法的int类型参数也会传到通知中去，参数名称tackNums也切点方法签名中的参数相匹配，
+		在xml也可以使用传参，只不过是将&&该为and
+		就是args(trackNums)中的参数名tackNums(还需要将参数传到pointCut的注解方法上）与playTrace方法的参数名必须相等
+		pointCut注解的方法为空方法，其知识作为一个标志而已
+		<aop:advisor/> 定义apo通知器
+		<aop:after-returning/>
+		<aop:aspect>定义一个切面
+		<aop:aspectj-autoproxy/>
+		<aop:config>	aop的顶层元素
+		<aop:pointcut>
+		<aop:config>
+			<aop:aspect ref="audience/>
+			<aop:pointcut id="peformance" expression="execution()"/>
+			<aop:after pointcut-ref="performance" method="play"/>
+			<aop:after ponitcut="execution()" method="play"/> 注意audience类必须先注入到容器中
+			<aop:aspect ref="audience>
+		<aop:config/>
+		
+		public class Audience{
+			public void play(){}
+		}
+		
+		
+		
+	@EnabelWebMvc 启动注解驱动的springmvc
+	@requestMapping 当类上也有requestMapping时方法上的这个注解会对类上的注解进行补充
+		
+		
+		
+	
