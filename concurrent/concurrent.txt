@@ -1,0 +1,12 @@
+java线程中的生命中的生命周期
+  java语言中的线程共有六种状态，分别是：
+    new(初始化状态)
+    Runnable(可运行/运行状态)
+    BlockED（阻塞状态）
+    WAITING(无限时等待状态)
+    TIMEE_WAITING（有限时等待）
+    TERMINATED(终止状态)
+
+  1.Runnable与blocke的状态转换
+	只有一种场景会触发这种转换，就是线程等待synchronized的隐式锁
+	注意：线程调用阻塞式API时，并不会转换到blocked状态，在操作系统层面，线程会转换到休眠状态
